@@ -2,7 +2,6 @@ package ci.smart.test.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,8 +9,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import ci.smart.test.business.UserBusiness;
-import ci.smart.test.business.UserBusiness.Request;
-import ci.smart.test.business.UserBusiness.Response;
+import ci.smart.test.utils.Request;
+import ci.smart.test.utils.Response;
+import ci.smart.test.utils.dto.UserDto;
 
 @CrossOrigin("*")
 @RestController
@@ -21,6 +21,38 @@ public class UserController {
 	@Autowired
 	private UserBusiness userBusiness;
 
+	
+	@RequestMapping(value = "/create", method = RequestMethod.POST, consumes = { "application/json" }, produces = {
+			"application/json" })
+	public Response<UserDto> create(@RequestBody Request<UserDto> request) {
 
+		Response<UserDto> response = new Response<UserDto>();
+
+		try {
+			System.out.println(request);
+			System.out.println(request.getData());
+			System.out.println(request.getDatas());
+			if (request.getDatas().isEmpty()) {
+				response.setMessage("liste vide");
+				response.setHasError(true);
+				return response;
+			}
+		response = userBusiness.createUser(request);
+
+		} catch (Exception e) {
+			e.printStackTrace();		
+			response.setHasError(true);
+			response.setMessage("Erreur rencontrée");
+		}
+		return response;
+	}
+
+
+
+
+
+	
+
+	
 	
 }
