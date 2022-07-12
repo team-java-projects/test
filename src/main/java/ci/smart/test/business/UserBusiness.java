@@ -1,12 +1,11 @@
 package ci.smart.test.business;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import javax.transaction.UserTransaction;
-
+import org.hibernate.resource.transaction.backend.jta.internal.JtaTransactionAdapterUserTransactionImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import ci.smart.test.entities.User;
@@ -19,9 +18,10 @@ import ci.smart.test.utils.transformer.UserTransformer;
 @Service
 public class UserBusiness {
 
-
+	@Autowired
 	private UserRepository userRepository;
-	private Response<UserDto> response;
+	
+//	private Response<UserDto> response;
 
 
 
@@ -42,7 +42,10 @@ public class UserBusiness {
 
 	public Response<UserDto> createUser (Request<UserDto> request) {
 
+		Response<UserDto> response = new Response<UserDto>();
+
 		List<User> items = new ArrayList<>();
+		List<UserDto> itemsDto = new ArrayList<>();
 
 		
 		try {
@@ -55,26 +58,30 @@ public class UserBusiness {
 			//	}
 
 			for (UserDto userDto : request.getDatas()) {
-				User userToSaved = userRepository.findByTelephone
-						(userDto.getTelephone());
-				if (userToSaved != null) {
+				User existingUser = userRepository.findByTelephone(userDto.getTelephone());
+				System.out.println(existingUser);
+				
+				if (existingUser != null) {
 					response.setMessage
 					("ce telephone appartient deja a un utilisateur");
 					response.setHasError(true);
 					return response;
 				}
-				
+				User userToSaved = UserTransformer.INSTANCE.toEntity(userDto);
 				items.add(userToSaved);
+				itemsDto.add(userDto);
 				
 			}
 			
-			if (!items.isEmpty() || items != null)
-			userRepository.saveAll(items);
+			if (!items.isEmpty() || items != null) {
+				userRepository.saveAll(items);
+				
+				response.setMessage(" Opération effectuée avec succes, utilisateur enregistré");
+				response.setHasError(false);
+				response.setItems(itemsDto);
+				return response;
+			}
 			
-			response.setMessage("user sauvegardé");;
-			response.setHasError(false);
-			response.setItems(null);
-			return response;
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -83,5 +90,35 @@ public class UserBusiness {
 		return response;
 	}
 
+	public Response<UserDto> connexion (Request<UserDto> request) {
+
+		Response<UserDto> response = new Response<UserDto>();
+		
+		try {
+
+				UserDto userDto = request.getData(); 
+				User userExisting = userRepository.findByLoginAndPassword
+							(userDto.getLogin(), userDto.getPassword());
+				if (userExisting == null) {
+					response.setMessage
+					("cet utilisateur n'existe pas");
+					response.setHasError(true);
+					return response;
+				}
+				UserDto udto = UserTransformer.INSTANCE.toDto(userExisting);
+				udto.setPassword(null);
+						
+				response.setMessage("utilisateur connecté");
+				response.setHasError(false);
+				response.setItem(udto);
+				return response;
+								
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return response;
+	}
+	
 
 }

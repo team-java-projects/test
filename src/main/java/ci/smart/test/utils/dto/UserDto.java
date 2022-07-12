@@ -1,5 +1,11 @@
 package ci.smart.test.utils.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder(alphabetic = true)
 public class UserDto {
 
 	  private Integer    id                   ; // Primary Key
@@ -7,7 +13,6 @@ public class UserDto {
 	    private String     nom                  ;
 	    private String     prenom               ;
 	    private String     telephone            ;
-	    private String     adresse              ;
 	    private String     password             ;
 	    private String 		login;
 	    
@@ -34,12 +39,6 @@ public class UserDto {
 		}
 		public void setTelephone(String telephone) {
 			this.telephone = telephone;
-		}
-		public String getAdresse() {
-			return adresse;
-		}
-		public void setAdresse(String adresse) {
-			this.adresse = adresse;
 		}
 		public String getPassword() {
 			return password;

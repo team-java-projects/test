@@ -29,14 +29,12 @@ public class UserController {
 		Response<UserDto> response = new Response<UserDto>();
 
 		try {
-			System.out.println(request);
-			System.out.println(request.getData());
-			System.out.println(request.getDatas());
 			if (request.getDatas().isEmpty()) {
 				response.setMessage("liste vide");
 				response.setHasError(true);
 				return response;
 			}
+			
 		response = userBusiness.createUser(request);
 
 		} catch (Exception e) {
@@ -48,7 +46,29 @@ public class UserController {
 	}
 
 
+	@RequestMapping(value = "/connexion", method = RequestMethod.POST, consumes = { "application/json" }, produces = {
+	"application/json" })
+public Response<UserDto> connexion(@RequestBody Request<UserDto> request) {
 
+Response<UserDto> response = new Response<UserDto>();
+
+try {
+
+	if (request.getData().getLogin() == null || request.getData().getPassword() == null) {
+		response.setMessage("Champs non renseigné");
+		response.setHasError(true);
+		return response;
+	}
+	
+response = userBusiness.connexion(request);
+
+} catch (Exception e) {
+	e.printStackTrace();		
+	response.setHasError(true);
+	response.setMessage("Erreur rencontrée");
+}
+return response;
+}
 
 
 	
